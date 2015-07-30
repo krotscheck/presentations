@@ -254,7 +254,7 @@
    * Push the contents of the dist directory to gh-pages.
    */
   gulp.task('gh-pages', function () {
-    return gulp.src(dir.dist + '/**/*')
+    return gulp.src(dir.dist + '/**/*.*')
       .pipe(ghPages());
   });
 
