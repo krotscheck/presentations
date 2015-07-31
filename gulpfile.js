@@ -28,6 +28,8 @@
     'html': dir.src + '/**/*.html',
     'hbs': dir.src + '/index.hbs',
     'index': dir.src + '/index.hbs',
+    'js': dir.src + '/**/*.js',
+    'css': dir.src + '/**/*.css',
     'images': [
       dir.src + '/**/*.png',
       dir.src + '/**/*.gif',
@@ -170,6 +172,22 @@
   });
 
   /**
+   * Copy any custom JS files into the dist folder.
+   */
+  gulp.task('package:js', function () {
+    return gulp.src(paths.js, {'base': dir.src})
+      .pipe(gulp.dest(dir.dist));
+  });
+
+  /**
+   * Copy any custom CSS files into the dist folder.
+   */
+  gulp.task('package:css', function () {
+    return gulp.src(paths.css, {'base': dir.src})
+      .pipe(gulp.dest(dir.dist));
+  });
+
+  /**
    * This task builds a new presentation from the base presentation template.
    */
   gulp.task('new', function () {
@@ -230,7 +248,7 @@
    * Package the entire site into the dist folder.
    */
   gulp.task('package', ['package:html', 'package:hbs', 'package:libs',
-    'package:images']);
+    'package:images', 'package:js', 'package:css']);
 
   /**
    * Push the contents of the dist directory to gh-pages.
@@ -255,6 +273,8 @@
     gulp.watch(paths.html, ['package:html']);
     gulp.watch(paths.images, ['package:images']);
     gulp.watch(paths.hbs, ['package:hbs']);
+    gulp.watch(paths.css, ['package:css']);
+    gulp.watch(paths.js, ['package:js']);
 
     return gulp.src(dir.dist)
       .pipe(webserver({

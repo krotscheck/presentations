@@ -9,10 +9,14 @@ Building your own presentations
 -------------------------------
 
 If you would like to use this repository as a base from which to build your 
-own presentation website, you can clone the ``starter`` branch and work from 
-there. First, you will need node and npm.
+own presentation website, simply clone the ``master`` branch and build from there.
+Once you do that, you will need node and npm.
 
-	// On ubuntu:
+	// Clone the repository.
+    git clone git@github.com:krotscheck/presentations.git
+    cd ./presentations
+    
+	// Install npm on ubuntu:
 	apt-get install nodejs nodejs-legacy npm
 
 
