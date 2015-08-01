@@ -77,6 +77,14 @@
           <small>Michael Krotscheck</small>
         </p>
       </section>
+      <section data-background-color="white">
+        <table>
+          <tr>
+            <td><img src="img/hpe_logo.png"/></td>
+            <td><img src="img/OpenStack-logo.png"/></td>
+          </tr>
+        </table>
+      </section>
 
       <section>
         <h2>TL/DR</h2>
@@ -121,7 +129,7 @@
           <br/>
           <img src="img/Netscape_2_logo.gif"/>
         </p>
-        <p class="fragment">A user agent (browser) permits scripts
+        <p>A user agent (browser) permits scripts
           contained in a first web page, to access data in a second web page,
           but only if both web pages have the same origin. </p>
       </section>
@@ -198,8 +206,8 @@
           <small><a href="http://www.alexhopmann.com/xmlhttp.htm">
             Alex Hopmann</a></small>
         </cite>
-
-        <p class="fragment">
+<hr/>
+        <p>
           <img src="img/Internet_Explorer_logo_old.png"/>
           <br/>
           <small>Internet Explorer 5 (1999)</small>
@@ -221,11 +229,11 @@ var httppost = new XMLHttpRequest();
 httppost.open("POST", "https://myapp.example.com/api/v1/thing", true);
 httppost.send("{}");
         </code></pre>
-        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
+        <pre><code class="http" data-trim>
 GET /api/v1/thing HTTP/1.1
 Host: myapp.example.com
         </code></pre>
-        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
+        <pre><code class="http" data-trim>
 POST /api/v1/thing HTTP/1.1
 Host: myapp.example.com
         </code></pre>
@@ -235,7 +243,7 @@ Host: myapp.example.com
         <h2>Except!</h2>
 
         <p>The same origin policy was extended to include XMLHttpRequest.</p>
-        <pre class="fragment"><code class="javascript" data-trim>
+        <pre class="fragment" data-fragment-index="1"><code class="javascript" data-trim>
 // http://myapp.example.com/scripts.js
 
 // This doesn't work.
@@ -244,13 +252,13 @@ xmlhttprequest.open("GET", "https://api.example.com/v1/users/me.json");
 // This doesn't work either
 xmlhttprequest.open("GET", "https://api.square.com/billing/cards.json");
         </code></pre>
-        <pre class="fragment"><code class="javascript" data-trim>
+        <pre class="fragment" data-fragment-index="2"><code class="javascript" data-trim>
 // https://mobile.example.com/scripts.js
 
 // Nor does this.
 xmlrequest.open("GET", "https://api.example.com/v1/users/me.json");
         </code></pre>
-        <pre class="fragment"><code class="javascript" data-trim>
+        <pre class="fragment" data-fragment-index="2"><code class="javascript" data-trim>
 // https://tablet.example.com/scripts.js
 
 // Or this.
@@ -278,8 +286,8 @@ import urllib2
 def proxyGet(fragment):
   urllib2.urlopen('https://api.square.com/%s' % (fragment,)).read();
         </code></pre>
-        <hr/>
-        <pre class="fragment"><code class="javascript" data-trim>
+        <hr class="fragment" data-fragment-index="1"/>
+        <pre class="fragment" data-fragment-index="1"><code class="javascript" data-trim>
 // Example response that would require an intelligent proxy.
 [
   {'ref': 'https://api.square.com/billing/cards/1234.json',
@@ -297,10 +305,8 @@ def proxyGet(fragment):
         </p>
         <pre class="fragment"><code class="html" data-trim>
 &lt;!-- http://myapp.example.com/index.html --&gt;
-&lt;iframe src="https://orders.example.com/iframe.html"&gt;
-&lt;/iframe&gt;
-&lt;iframe src="https://products.example.com/iframe.html"&gt;
-&lt;/iframe&gt;
+&lt;iframe src="https://orders.example.com/iframe.html"&gt;&lt;/iframe&gt;
+&lt;iframe src="https://products.example.com/iframe.html"&gt;&lt;/iframe&gt;
         </code></pre>
 <pre class="fragment"><code data-trim class="javascript">
 document.domain = "example.com"
@@ -367,38 +373,29 @@ childframe.contentWindow
       </section>
 
       <section>
-        <h2>CORS Protocol</h2>
+        <h2>The two parts of CORS</h2>
         <ol>
           <li class="fragment">
-            <strong>Preflight Request</strong>
-            <ul>
-              <li>Mother May I?</li>
-              <li>HTTP OPTIONS</li>
-              <li>Cacheable</li>
-            </ul>
+            <strong>Preflight Check</strong>
           </li>
           <li class="fragment">
-            <strong>Real Request</strong>
-            <ul>
-              <li>Perform an action</li>
-              <li>HTTP GET/PUT/POST/DELETE/PATCH/etc...</li>
-            </ul>
+            <strong>Request</strong>
           </li>
         </ol>
       </section>
       <section>
         <h2>CORS Preflight Exchange</h2>
 
-        <p class="fragment" data-fragment-index="1">Client Request</p>
-        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
+        <p>Browser Request</p>
+        <pre><code class="http" data-trim>
 OPTIONS /billing/cards HTTP/1.1
 Host: api.example.com
 Origin: https://myapp.example.com
 Access-Control-Request-Method: GET
 Access-Control-Request-Headers: accept, x-client
         </code></pre>
-        <p class="fragment" data-fragment-index="2">Permissive Response</p>
-        <pre class="fragment" data-fragment-index="2"><code class="http" data-trim>
+        <p class="fragment" data-fragment-index="1">Permissive Response</p>
+        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
 HTTP/1.0 200 OK
 Vary: Origin
 Access-Control-Allow-Origin: https://myapp.example.com
@@ -410,16 +407,16 @@ Access-Control-Max-Age: 3600
       </section>
       <section>
         <h2>CORS Request</h2>
-        <p class="fragment" data-fragment-index="1">Client Request</p>
-        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
+        <p>Browser Request</p>
+        <pre><code class="http" data-trim>
 GET /billing/cards HTTP/1.1
 Host: api.example.com
 Origin: https://myapp.example.com
 Accept: application/json
 X-Client: myapp
         </code></pre>
-        <p class="fragment" data-fragment-index="2">Permissive Response</p>
-        <pre class="fragment" data-fragment-index="2"><code class="http" data-trim>
+        <p class="fragment" data-fragment-index="1">Permissive Response</p>
+        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
 HTTP/1.0 200 OK
 Content-Type: application/json; charset=UTF-8
 Vary: Origin
@@ -430,7 +427,7 @@ Access-Control-Expose-Headers: Accept,Content-Type,Cache-Control,Content-Languag
       </section>
       <section>
         <h2>CORS WildCard Response</h2>
-        <pre class="fragment"><code class="http" data-trim>
+        <pre><code class="http" data-trim>
 HTTP/1.0 200 OK
 Content-Type: application/json; charset=UTF-8
 Vary: Origin
@@ -678,11 +675,16 @@ class CORS(base.Middleware):
 
     <section>
       <h1>Demo</h1>
+      <p>
+        <a href="http://krotscheck.github.com/ironic-webclient">
+          http://krotscheck.github.com/ironic-webclient
+        </a>
+      </p>
     </section>
 
     <section>
       <section>
-        <h1>Thank you!</h1>
+        <h3>Questions?</h3>
       </section>
       <section>
         <dl>
