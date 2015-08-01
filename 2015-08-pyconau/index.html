@@ -39,127 +39,676 @@
   <!--[if lt IE 9]>
   <script src="../lib/js/html5shiv.js"></script>
   <![endif]-->
+
+  <style>
+    .reveal .footer {
+      position: absolute;
+      bottom: 1em;
+      left: 1em;
+      font-size: 0.5em;
+    }
+
+    .reveal section img {
+      border: 0;
+      box-shadow: none;
+    }
+
+    tr {
+      border: none;
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="reveal" data-transition="slide">
+  <div class="footer">
+    https://krotscheck.github.io/presentations/2015-08-pyconau/index.html
+  </div>
 
   <!-- Any section element inside of this container is displayed as a slide -->
   <div class="slides">
     <section>
-      <h2>Talking to Browsers with CORS</h2>
-
-      <h4>Breaking the single origin policy</h4>
-    </section>
-
-    <section>
-      <dl>
-        <dt>Author:</dt>
-        <dd>
-          <a href="http://www.krotscheck.net">Michael Krotscheck</a>
-          <br/>
-          <a href="http://twitter.com/krotscheck" target="_blank">
-            <i class="fa fa-twitter"></i> krotscheck
-          </a>
-          <br/>
-          <a href="http://www.krotscheck.net" target="_blank">
-            <i class="fa fa-wordpress"></i> http://www.krotscheck.net
-          </a>
-        </dd>
-        <dt>Source:</dt>
-        <dd><a href="https://github.com/krotscheck/presentations">
-          https://github.com/krotscheck/presentations
-        </a></dd>
-        <dt>License:</dt>
-        <dd><a rel="license"
-               href="http://creativecommons.org/licenses/by/4.0/">Creative
-          Commons Attribution 4.0 International</a></dd>
-      </dl>
-    </section>
-
-    <section>
-      <h2>Topics Covered</h2>
-    </section>
-
-    <section>
       <section>
-        <h2>Single Origin Policy</h2>
-      </section>
-      <section>
-        <h2>Security Concerns</h2>
-      </section>
-    </section>
-
-    <section>
-      <section>
-        <h2>Web Application Design Patterns</h2>
-      </section>
-      <section>
-        <h2>All-in-one</h2>
-      </section>
-      <section>
-        <h2>API + UI</h2>
-      </section>
-      <section>
-        <h2>API(s) + UI + UI-Server</h2>
+        <h2>Talking to Browsers with CORS</h2>
+        <h4>Breaking the same-origin policy</h4>
 
         <p>
-          <i class="icon-python"></i>
+          <small>Michael Krotscheck</small>
         </p>
       </section>
-    </section>
 
-    <section>
       <section>
-        <h2>CORS</h2>
-      </section>
-      <section>
-        <h2>CORS Preflight request</h2>
-      </section>
-      <section>
-        <h2>CORS Preflight response</h2>
-      </section>
-      <section>
-        <h2>CORS Http Request</h2>
-      </section>
-      <section>
-        <h2>CORS Http Response</h2>
-      </section>
-    </section>
-
-    <section>
-      <section>
-        <h2>Implementing CORS</h2>
+        <h2>TL/DR</h2>
         <dl>
-          <dt>Apache 2</dt>
-          <dd>mod_headers</dd>
-          <dt>Nginx</dt>
-          <dd>add_headers</dd>
-          <dt>Python WSGI</dt>
-          <dd>mod_headers</dd>
+          <dt>Presentation</dt>
+          <dd>https://krotscheck.github.io/presentations/</dd>
+          <dt>CORS Specification</dt>
+          <dd>
+            <a href="http://www.w3.org/TR/cors/">
+              http://www.w3.org/TR/cors/
+            </a>
+          </dd>
+          <dt>Example Implementation</dt>
+          <dd>
+            <a
+              href="http://git.openstack.org/cgit/openstack/oslo.middleware/tree/oslo_middleware/cors.py#n176">
+              http://git.openstack.org/cgit/openstack/<br/>
+              oslo.middleware/tree/oslo_middleware/cors.py#n176
+            </a>
+          </dd>
         </dl>
-        <ul>
-          <li>Apache2: mod_headers</li>
-          <li>Nginx: add_headers</li>
-          <li>Python: Middleware</li>
+      </section>
+    </section>
+
+    <section>
+      <h2>Overview</h2>
+      <ol>
+        <li>Same-origin policy &amp; XMLHttpRequest</li>
+        <li>Breaking the Browser Sandbox</li>
+        <li>CORS Specification</li>
+        <li>Example Implementation</li>
+        <li>Demo</li>
+      </ol>
+    </section>
+
+    <section>
+      <section>
+        <h2>Same-origin policy</h2>
+
+        <p>
+          <small>Netscape 2 (1995)</small>
+          <br/>
+          <img src="img/Netscape_2_logo.gif"/>
+        </p>
+        <p class="fragment">A user agent (browser) permits scripts
+          contained in a first web page, to access data in a second web page,
+          but only if both web pages have the same origin. </p>
+      </section>
+
+      <section>
+        <h2>Origin</h2>
+
+        <p>A combination of URI scheme, hostname, and port.</p>
+
+        <p style="white-space: nowrap">
+          <strong style="color:blue">http</strong>://<strong
+          style="color:blue">www.example.com</strong>:<strong
+          style="color:blue">8080</strong>/script.js
+        </p>
+        <ul style="list-style: none">
+          <li class="fragment" data-fragment-index="1">
+            <i class="fa fa-check" style="color:green"></i>
+            <strong style="color:blue">http</strong>://<strong
+            style="color:blue">www.example.com</strong>:<strong
+            style="color:blue">8080</strong>/index.html
+          </li>
+          <li class="fragment" data-fragment-index="2">
+            <i class="fa fa-times" style="color:red"></i>
+            <strong style="color:red">https</strong>://<strong
+            style="color:blue">www.example.com</strong>:<strong
+            style="color:blue">8080</strong>/index.html
+          </li>
+          <li class="fragment" data-fragment-index="2">
+            <i class="fa fa-times" style="color:red"></i>
+            <strong style="color:blue">http</strong>://<strong
+            style="color:red">example.com</strong>:<strong
+            style="color:blue">8080</strong>/index.html
+          </li>
+          <li class="fragment" data-fragment-index="2">
+            <i class="fa fa-times" style="color:red"></i>
+            <strong style="color:blue">http</strong>://<strong
+            style="color:blue">www.example.com</strong>:<strong
+            style="color:red">80</strong>/index.html
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Why?</h2>
+          <pre class="fragment"><code class="html" data-trim>
+&lt;script src="https://malicious.com/keystrokelogger.js" &gt;&lt;/script&gt;
+&lt;iframe src="https://amazon.com/all_my_credit_card_info.html"
+  width="100%" height="100%" &gt;&lt;/iframe&gt;
+          </code></pre>
+      </section>
+      <section>
+        <h2>Legacy Exceptions</h2>
+
+        <p>Directly including scripts</p>
+        <pre><code class="html" data-trim>
+          &lt;script src="https://api.example.com/script.js" &gt;&lt;/script&gt;
+        </code></pre>
+        <p>Form POST</p>
+        <pre><code class="html" data-trim>
+          &lt;form method="POST" action="https://api.example.com/action" &gt;&lt;/form&gt;
+        </code></pre>
+      </section>
+    </section>
+    <section>
+      <section>
+        <h2>XMLHttpRequest</h2>
+
+        <quote>
+          <small>"...that was the easiest excuse for shipping it so I
+            needed to cram XML into the name."
+          </small>
+        </quote>
+        <cite>
+          <small><a href="http://www.alexhopmann.com/xmlhttp.htm">
+            Alex Hopmann</a></small>
+        </cite>
+
+        <p class="fragment">
+          <img src="img/Internet_Explorer_logo_old.png"/>
+          <br/>
+          <small>Internet Explorer 5 (1999)</small>
+          <br/>
+          <small>Outlook Web Access (Exchange Server 2000)</small>
+        </p>
+      </section>
+
+      <section>
+        <h2>XMLHttpRequest</h2>
+        <pre><code class="javascript" data-trim>
+// http://myapp.example.com/scripts.js
+
+var httpget = new XMLHttpRequest();
+httpget.open("GET", "https://myapp.example.com/api/v1/thing", true);
+httpget.send();
+
+var httppost = new XMLHttpRequest();
+httppost.open("POST", "https://myapp.example.com/api/v1/thing", true);
+httppost.send("{}");
+        </code></pre>
+        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
+GET /api/v1/thing HTTP/1.1
+Host: myapp.example.com
+        </code></pre>
+        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
+POST /api/v1/thing HTTP/1.1
+Host: myapp.example.com
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>Except!</h2>
+
+        <p>The same origin policy was extended to include XMLHttpRequest.</p>
+        <pre class="fragment"><code class="javascript" data-trim>
+// http://myapp.example.com/scripts.js
+
+// This doesn't work.
+xmlhttprequest.open("GET", "https://api.example.com/v1/users/me.json");
+
+// This doesn't work either
+xmlhttprequest.open("GET", "https://api.square.com/billing/cards.json");
+        </code></pre>
+        <pre class="fragment"><code class="javascript" data-trim>
+// https://mobile.example.com/scripts.js
+
+// Nor does this.
+xmlrequest.open("GET", "https://api.example.com/v1/users/me.json");
+        </code></pre>
+        <pre class="fragment"><code class="javascript" data-trim>
+// https://tablet.example.com/scripts.js
+
+// Or this.
+xmlrequest.open("GET", "https://api.example.com/v1/users/me.json");
+        </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Hacks and Workarounds</h2>
+
+        <p>The terrible things we did.</p>
+      </section>
+      <section>
+        <h2>HTTP Proxies</h2>
+        <pre><code class="javascript" data-trim>
+// https://myapp.example.com/app.js
+xmlhttprequest.open("GET", "https://myapp.example.com/square/billing/cards.json");
+        </code></pre>
+        <pre><code class="python" data-trim>
+# pythonapp/proxy/square.py
+import urllib2
+
+def proxyGet(fragment):
+  urllib2.urlopen('https://api.square.com/%s' % (fragment,)).read();
+        </code></pre>
+        <hr/>
+        <pre class="fragment"><code class="javascript" data-trim>
+// Example response that would require an intelligent proxy.
+[
+  {'ref': 'https://api.square.com/billing/cards/1234.json',
+   'type': 'link'},
+  {'ref': 'https://api.square.com/billing/cards/2231.json',
+   'type': 'link'}
+]
+        </code></pre>
+      </section>
+      <section>
+        <h2>document.domain</h2>
+
+        <p>
+          <small>HTML DOM 2.0 (read only), January 2003</small>
+        </p>
+        <pre class="fragment"><code class="html" data-trim>
+&lt;!-- http://myapp.example.com/index.html --&gt;
+&lt;iframe src="https://orders.example.com/iframe.html"&gt;
+&lt;/iframe&gt;
+&lt;iframe src="https://products.example.com/iframe.html"&gt;
+&lt;/iframe&gt;
+        </code></pre>
+<pre class="fragment"><code data-trim class="javascript">
+document.domain = "example.com"
+</code></pre>
+      </section>
+      <section>
+        <h2>JSONP</h2>
+
+        <p>
+          <small>JSON With Padding (2006)</small>
+        </p>
+        <pre class="fragment"><code data-trim class="html">
+&lt;script type="application/javascript"
+  src="https://api.square.com/billing/cards.js?callback=receiver"&gt;
+&lt;/script&gt;
+        </code></pre>
+        <pre class="fragment"><code data-trim class="javascript">
+receiver({"Name": "Foo", "Id": 1});
+        </code></pre>
+      </section>
+      <section>
+        <h2>Cross-document messaging</h2>
+
+        <p>
+          <small><a
+            href="https://html.spec.whatwg.org/multipage/comms.html#crossDocumentMessages">
+            https://www.whatwg.org</a> (ca 2008)</small>
+        </p>
+        <pre class="fragment"><code data-trim class="javascript">
+// https://orders.example.com/childIframe.html
+window.addEventListener('message', function receiver(event) {
+  alert(event.data);
+}, false);
+        </code></pre>
+        <pre class="fragment"><code data-trim class="javascript">
+// https://myapp.example.com/index.html
+var childframe = document.getElementsByTagName('iframe')[0];
+childframe.contentWindow
+          .postMessage('message_content', 'https://myapp.example.com/');
+        </code></pre>
+      </section>
+      <section>
+        <h2>WebSockets</h2>
+
+        <p>
+          <small><a href="https://tools.ietf.org/html/rfc6455">RFC 6455</a> (2011)</small>
+        </p>
+        <blockquote>Optionally, an |Origin| header field. This header field is
+          sent by all browser clients.
+        </blockquote>
+
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Cross-Origin Resource Sharing (CORS)</h2>
+
+        <p>January 2014</p>
+
+        <p><a href="http//www.w3.org/TR/cors/">
+          http//www.w3.org/TR/cors/
+        </a></p>
+      </section>
+
+      <section>
+        <h2>CORS Protocol</h2>
+        <ol>
+          <li class="fragment">
+            <strong>Preflight Request</strong>
+            <ul>
+              <li>Mother May I?</li>
+              <li>HTTP OPTIONS</li>
+              <li>Cacheable</li>
+            </ul>
+          </li>
+          <li class="fragment">
+            <strong>Real Request</strong>
+            <ul>
+              <li>Perform an action</li>
+              <li>HTTP GET/PUT/POST/DELETE/PATCH/etc...</li>
+            </ul>
+          </li>
+        </ol>
+      </section>
+      <section>
+        <h2>CORS Preflight Exchange</h2>
+
+        <p class="fragment" data-fragment-index="1">Client Request</p>
+        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
+OPTIONS /billing/cards HTTP/1.1
+Host: api.example.com
+Origin: https://myapp.example.com
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: accept, x-client
+        </code></pre>
+        <p class="fragment" data-fragment-index="2">Permissive Response</p>
+        <pre class="fragment" data-fragment-index="2"><code class="http" data-trim>
+HTTP/1.0 200 OK
+Vary: Origin
+Access-Control-Allow-Origin: https://myapp.example.com
+Access-Control-Allow-Methods: GET
+Access-Control-Allow-Headers: accept,x-client
+Access-Control-Allow-Credentials: true
+Access-Control-Max-Age: 3600
+        </code></pre>
+      </section>
+      <section>
+        <h2>CORS Request</h2>
+        <p class="fragment" data-fragment-index="1">Client Request</p>
+        <pre class="fragment" data-fragment-index="1"><code class="http" data-trim>
+GET /billing/cards HTTP/1.1
+Host: api.example.com
+Origin: https://myapp.example.com
+Accept: application/json
+X-Client: myapp
+        </code></pre>
+        <p class="fragment" data-fragment-index="2">Permissive Response</p>
+        <pre class="fragment" data-fragment-index="2"><code class="http" data-trim>
+HTTP/1.0 200 OK
+Content-Type: application/json; charset=UTF-8
+Vary: Origin
+Access-Control-Allow-Origin: https://myapp.example.com
+Access-Control-Allow-Credentials: true
+Access-Control-Expose-Headers: Accept,Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma
+        </code></pre>
+      </section>
+      <section>
+        <h2>CORS WildCard Response</h2>
+        <pre class="fragment"><code class="http" data-trim>
+HTTP/1.0 200 OK
+Content-Type: application/json; charset=UTF-8
+Vary: Origin
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+Access-Control-Expose-Headers: Accept,Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma
+        </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>CORS: Server</h2>
+        <ul style="list-style: none">
+          <li><strong>Apache 2</strong>: mod_headers</li>
+          <li><strong>Nginx</strong>: add_headers</li>
         </ul>
       </section>
       <section>
-        <h2>mod_headers</h2>
-      </section>
-      <section>
-        <h2>CORS via WSGI</h2>
+        <h2>CORS: Python Packages</h2>
+        <ul style="list-style: none">
+          <li>django-cors-headers</li>
+          <li>wsgicors</li>
+          <li>Flask-Cors</li>
+          <li>tornado-cors</li>
+          <li>oslo_middleware</li>
+        </ul>
       </section>
       <section>
         <h2>oslo_middleware</h2>
-      </section>
-      <section>
-        <h2>other middleware</h2>
+        <p><small>
+          <a href="http://git.openstack.org/cgit/openstack/oslo.middleware/tree/oslo_middleware/cors.py">
+            http://git.openstack.org/cgit/openstack/oslo.middleware/tree/oslo_middleware/cors.py
+          </a></small></p>
+        <pre><code class="python">
+class CORS(base.Middleware):
+    """CORS Middleware.
+
+    This middleware allows a WSGI app to serve CORS headers for multiple
+    configured domains.
+
+    For more information, see http://www.w3.org/TR/cors/
+    """
+
+    simple_headers = [
+        'Content-Type',
+        'Cache-Control',
+        'Content-Language',
+        'Expires',
+        'Last-Modified',
+        'Pragma'
+    ]
+
+    def __init__(self, application, conf=None):
+        super(CORS, self).__init__(application)
+
+        # Begin constructing our configuration hash.
+        self.allowed_origins = {}
+
+    def add_origin(self, allowed_origin, allow_credentials=True,
+                   expose_headers=None, max_age=None, allow_methods=None,
+                   allow_headers=None):
+        '''Add another origin to this filter.
+
+        :param allowed_origin: Protocol, host, and port for the allowed origin.
+        :param allow_credentials: Whether to permit credentials.
+        :param expose_headers: A list of headers to expose.
+        :param max_age: Maximum cache duration.
+        :param allow_methods: List of HTTP methods to permit.
+        :param allow_headers: List of HTTP headers to permit from the client.
+        :return:
+        '''
+
+        if allowed_origin in self.allowed_origins:
+            LOG.warn('Allowed origin [%s] already exists, skipping' % (
+                allowed_origin,))
+            return
+
+        self.allowed_origins[allowed_origin] = {
+            'allow_credentials': allow_credentials,
+            'expose_headers': expose_headers,
+            'max_age': max_age,
+            'allow_methods': allow_methods,
+            'allow_headers': allow_headers
+        }
+
+    def process_response(self, response, request=None):
+        '''Check for CORS headers, and decorate if necessary.
+
+        Perform two checks. First, if an OPTIONS request was issued, let the
+        application handle it, and (if necessary) decorate the response with
+        preflight headers. In this case, if a 404 is thrown by the underlying
+        application (i.e. if the underlying application does not handle
+        OPTIONS requests, the response code is overridden.
+
+        In the case of all other requests, regular request headers are applied.
+        '''
+
+        # Sanity precheck: If we detect CORS headers provided by something in
+        # in the middleware chain, assume that it knows better.
+        if 'Access-Control-Allow-Origin' in response.headers:
+            return response
+
+        # Doublecheck for an OPTIONS request.
+        if request.method == 'OPTIONS':
+            return self._apply_cors_preflight_headers(request=request,
+                                                      response=response)
+
+        # Apply regular CORS headers.
+        self._apply_cors_request_headers(request=request, response=response)
+
+        # Finally, return the response.
+        return response
+
+    def _split_header_values(self, request, header_name):
+        """Convert a comma-separated header value into a list of values."""
+        values = []
+        if header_name in request.headers:
+            for value in request.headers[header_name].rsplit(','):
+                value = value.strip()
+                if value:
+                    values.append(value)
+        return values
+
+    def _apply_cors_preflight_headers(self, request, response):
+        """Handle CORS Preflight (Section 6.2)
+
+        Given a request and a response, apply the CORS preflight headers
+        appropriate for the request.
+        """
+
+        # If the response contains a 2XX code, we have to assume that the
+        # underlying middleware's response content needs to be persisted.
+        # Otherwise, create a new response.
+        if 200 > response.status_code or response.status_code >= 300:
+            response = webob.response.Response(status=webob.exc.HTTPOk.code)
+
+        # Does the request have an origin header? (Section 6.2.1)
+        if 'Origin' not in request.headers:
+            return response
+
+        # Is this origin registered? (Section 6.2.2)
+        origin = request.headers['Origin']
+        if origin not in self.allowed_origins:
+            if '*' in self.allowed_origins:
+                origin = '*'
+            else:
+                LOG.debug('CORS request from origin \'%s\' not permitted.'
+                          % (origin,))
+                return response
+        cors_config = self.allowed_origins[origin]
+
+        # If there's no request method, exit. (Section 6.2.3)
+        if 'Access-Control-Request-Method' not in request.headers:
+            LOG.debug('CORS request does not contain '
+                      'Access-Control-Request-Method header.')
+            return response
+        request_method = request.headers['Access-Control-Request-Method']
+
+        # Extract Request headers. If parsing fails, exit. (Section 6.2.4)
+        try:
+            request_headers = \
+                self._split_header_values(request,
+                                          'Access-Control-Request-Headers')
+        except Exception:
+            LOG.debug('Cannot parse request headers.')
+            return response
+
+        # Compare request method to permitted methods (Section 6.2.5)
+        if request_method not in cors_config['allow_methods']:
+            LOG.debug('Request method \'%s\' not in permitted list: %s'
+                      % (request_method, cors_config['allow_methods']))
+            return response
+
+        # Compare request headers to permitted headers, case-insensitively.
+        # (Section 6.2.6)
+        for requested_header in request_headers:
+            upper_header = requested_header.upper()
+            permitted_headers = (cors_config['allow_headers'] +
+                                 self.simple_headers)
+            if upper_header not in (header.upper() for header in
+                                    permitted_headers):
+                LOG.debug('Request header \'%s\' not in permitted list: %s'
+                          % (requested_header, permitted_headers))
+                return response
+
+        # Set the default origin permission headers. (Sections 6.2.7, 6.4)
+        response.headers['Vary'] = 'Origin'
+        response.headers['Access-Control-Allow-Origin'] = origin
+
+        # Does this CORS configuration permit credentials? (Section 6.2.7)
+        if cors_config['allow_credentials']:
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+
+        # Attach Access-Control-Max-Age if appropriate. (Section 6.2.8)
+        if 'max_age' in cors_config and cors_config['max_age']:
+            response.headers['Access-Control-Max-Age'] = \
+                str(cors_config['max_age'])
+
+        # Attach Access-Control-Allow-Methods. (Section 6.2.9)
+        response.headers['Access-Control-Allow-Methods'] = request_method
+
+        # Attach  Access-Control-Allow-Headers. (Section 6.2.10)
+        if request_headers:
+            response.headers['Access-Control-Allow-Headers'] = \
+                ','.join(request_headers)
+
+        return response
+
+    def _apply_cors_request_headers(self, request, response):
+        """Handle Basic CORS Request (Section 6.1)
+
+        Given a request and a response, apply the CORS headers appropriate
+        for the request to the response.
+        """
+
+        # Does the request have an origin header? (Section 6.1.1)
+        if 'Origin' not in request.headers:
+            return
+
+        # Is this origin registered? (Section 6.1.2)
+        origin = request.headers['Origin']
+        if origin not in self.allowed_origins:
+            LOG.debug('CORS request from origin \'%s\' not permitted.'
+                      % (origin,))
+            return
+        cors_config = self.allowed_origins[origin]
+
+        # Set the default origin permission headers. (Sections 6.1.3 & 6.4)
+        response.headers['Vary'] = 'Origin'
+        response.headers['Access-Control-Allow-Origin'] = origin
+
+        # Does this CORS configuration permit credentials? (Section 6.1.3)
+        if cors_config['allow_credentials']:
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+
+        # Attach the exposed headers and exit. (Section 6.1.4)
+        if cors_config['expose_headers']:
+            response.headers['Access-Control-Expose-Headers'] = \
+                ','.join(cors_config['expose_headers'])
+
+        </code></pre>
       </section>
     </section>
 
+    <section>
+      <h1>Demo</h1>
+    </section>
 
+    <section>
+      <section>
+        <h1>Thank you!</h1>
+      </section>
+      <section>
+        <dl>
+          <dt>Author:</dt>
+          <dd>
+            <a href="http://www.krotscheck.net">Michael Krotscheck</a>
+            <br/>
+            <a href="http://twitter.com/krotscheck" target="_blank">
+              <i class="fa fa-twitter"></i> krotscheck
+            </a>
+            <br/>
+            <a href="http://www.krotscheck.net" target="_blank">
+              <i class="fa fa-wordpress"></i> http://www.krotscheck.net
+            </a>
+          </dd>
+          <dt>Source:</dt>
+          <dd><a href="https://github.com/krotscheck/presentations">
+            https://github.com/krotscheck/presentations
+          </a></dd>
+          <dt>License:</dt>
+          <dd><a rel="license"
+                 href="http://creativecommons.org/licenses/by/4.0/">Creative
+            Commons Attribution 4.0 International</a></dd>
+        </dl>
+      </section>
+    </section>
   </div>
 
   <script src="../lib/js/head.min.js"></script>
