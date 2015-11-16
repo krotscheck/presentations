@@ -206,7 +206,7 @@
           <small><a href="http://www.alexhopmann.com/xmlhttp.htm">
             Alex Hopmann</a></small>
         </cite>
-<hr/>
+        <hr/>
         <p>
           <img src="img/Internet_Explorer_logo_old.png"/>
           <br/>
@@ -333,7 +333,8 @@ receiver({"Name": "Foo", "Id": 1});
         <p>
           <small><a
             href="https://html.spec.whatwg.org/multipage/comms.html#crossDocumentMessages">
-            https://www.whatwg.org</a> (ca 2008)</small>
+            https://www.whatwg.org</a> (ca 2008)
+          </small>
         </p>
         <pre class="fragment"><code data-trim class="javascript">
 // https://orders.example.com/childIframe.html
@@ -407,6 +408,7 @@ Access-Control-Max-Age: 3600
       </section>
       <section>
         <h2>CORS Request</h2>
+
         <p>Browser Request</p>
         <pre><code class="http" data-trim>
 GET /billing/cards HTTP/1.1
@@ -458,10 +460,14 @@ Access-Control-Expose-Headers: Accept,Content-Type,Cache-Control,Content-Languag
       </section>
       <section>
         <h2>oslo_middleware</h2>
-        <p><small>
-          <a href="http://git.openstack.org/cgit/openstack/oslo.middleware/tree/oslo_middleware/cors.py">
-            http://git.openstack.org/cgit/openstack/oslo.middleware/tree/oslo_middleware/cors.py
-          </a></small></p>
+
+        <p>
+          <small>
+            <a
+              href="http://git.openstack.org/cgit/openstack/oslo.middleware/tree/oslo_middleware/cors.py">
+              http://git.openstack.org/cgit/openstack/oslo.middleware/tree/oslo_middleware/cors.py
+            </a></small>
+        </p>
         <pre><code class="python">
 class CORS(base.Middleware):
     """CORS Middleware.
@@ -675,6 +681,7 @@ class CORS(base.Middleware):
 
     <section>
       <h1>Demo</h1>
+
       <p>
         <a href="http://krotscheck.github.com/ironic-webclient">
           http://krotscheck.github.com/ironic-webclient
@@ -761,6 +768,6 @@ class CORS(base.Middleware):
     });
 
   </script>
-
+</div>
 </body>
 </html>
