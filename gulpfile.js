@@ -200,9 +200,9 @@
           {
             type: 'input',
             name: 'folderName',
-            message: 'Presentation Folder Name (/^[a-z][a-z_]+$/):',
+            message: 'Presentation Folder Name (/^[a-z0-9][a-z0-9_]+$/):',
             validate: function (value) {
-              var result = value.match(/^([a-z][a-z_]+)$/);
+              var result = value.match(/^([a-z0-9][a-z0-9_]+)$/);
               return result !== null;
             }
           },
