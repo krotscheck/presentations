@@ -11,6 +11,7 @@
   var ghPages = require('gulp-gh-pages');
   var filter = require('gulp-filter');
   var less = require('gulp-less');
+  var debug = require('gulp-debug');
   var webserver = require('gulp-webserver');
   var streamqueue = require('streamqueue');
   var ignore = require('gulp-ignore');
@@ -103,20 +104,20 @@
    */
   gulp.task('package:libs', function (cb) {
     var resolveCSS = gulp.src(bowerFiles)
-      .pipe(filter('*.css'))
+      .pipe(filter(['**/*.css']))
       .pipe(gulp.dest(dir.dist + '/css'));
 
     var resolveLESS = gulp.src(bowerFiles)
-      .pipe(filter('*.less'))
+      .pipe(filter(['**/*.less']))
       .pipe(less())
       .pipe(gulp.dest(dir.dist + '/css'));
 
     var resolveFonts = gulp.src(bowerFiles)
-      .pipe(filter(['*.otf', '*.eot', '*.svg', '*.ttf', '*.woff', '*.woff2']))
+      .pipe(filter(['**/*.otf', '**/*.eot', '**/*.svg', '**/*.ttf', '**/*.woff', '**/*.woff2']))
       .pipe(gulp.dest(dir.dist + '/fonts'));
 
     var resolveLibs = gulp.src(bowerFiles)
-      .pipe(filter('*.js'))
+      .pipe(filter('**/*.js'))
       .pipe(gulp.dest(dir.dist + '/js'));
 
     // Reveal.js is a special snowflake.
