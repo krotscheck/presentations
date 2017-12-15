@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>OAuth2 for Browser Clients</title>
+
+  <meta name="description"
+        content="">
+  <meta name="author" content="Michael Krotscheck">
+
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"/>
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+  <link rel="stylesheet" href="../css/reveal.css">
+  <link rel="stylesheet" href="../css/font-awesome.css">
+  <link rel="stylesheet" href="../css/font-mfizz.css">
+  <link rel="stylesheet" href="../css/theme/serif.css" id="theme">
+
+  <!-- Code syntax highlighting -->
+  <link rel="stylesheet" href="../lib/css/zenburn.css">
+  <style>
+    .reveal table td {
+      border-bottom: none;
+    }
+
+    .reveal table th {
+      border-bottom: none;
+    }
+
+    table tr td {
+      padding: 30px;
+      vertical-align: top;
+    }
+  </style>
+
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href =
+      window.location.search.match(/print-pdf/gi) ?
+        '../css/print/pdf.css' :
+        '../css/print/paper.css';
+    document.getElementsByTagName('head')[0].appendChild(link);
+  </script>
+
+  <style>
+    .reveal .footer {
+      position: absolute;
+      bottom: 1em;
+      left: 1em;
+      font-size: 0.5em;
+    }
+
+    .reveal section img {
+      border: 0;
+      box-shadow: none;
+    }
+
+    tr {
+      border: none;
+    }
+  </style>
+
+  <!--[if lt IE 9]>
+  <script src="../lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal" data-transition="slide">
+  <div class="footer">
+    https://krotscheck.github.io/presentations/2017_12_14_oauth2/index.html
+  </div>
+
+  <div class="slides">
+    <section>
+      <section>
+        <h2>OAuth2 for Browser Clients</h2>
+
+        <p>by Michael Krotscheck</p>
+      </section>
+    </section>
+    <section>
+      <section>
+        <h2>Dunning-Kruger Effect</h2>
+        <blockquote>... a cognitive bias wherein people of low ability suffer from illusory superiority, mistakenly
+          assessing their cognitive ability as greater than it is. -- Wikipedia
+        </blockquote>
+      </section>
+      <section>
+        <h3>Introductions!</h3>
+        <dl>
+          <dt>Speaker:</dt>
+          <dd>
+            <a href="https://www.krotscheck.net">Michael Krotscheck</a>
+            <br/>
+            <a href="https://www.vmware.com">
+              <i class="fa fa-building-o"></i> VMware
+            </a>
+            <br/>
+            <a href="https://twitter.com/krotscheck" target="_blank">
+              <i class="fa fa-twitter"></i> krotscheck
+            </a>
+            <br/>
+            <a href="https://github.com/krotscheck" target="_blank">
+              <i class="fa fa-github"></i> https://github.com/krotscheck
+            </a>
+            <br/>
+            <a href="https://www.krotscheck.net" target="_blank">
+              <i class="fa fa-wordpress"></i> https://www.krotscheck.net
+            </a>
+          </dd>
+          <dt>Source:</dt>
+          <dd><a href="https://github.com/krotscheck/presentations">
+            https://github.com/krotscheck/presentations
+          </a></dd>
+        </dl>
+      </section>
+      <section>
+        <h3>Career OAuth2 Implementations</h3>
+        <h1>6</h1>
+      </section>
+      <section>
+        <h3>Correct Implementations</h3>
+        <h1>0</h1>
+      </section>
+    </section>
+
+    <section>
+
+      <section>
+        <img src="oauth_logo_final.svg"/>
+      </section>
+
+      <section>
+        <ul style="list-style: none">
+          <li><a href="https://tools.ietf.org/html/rfc6749" target="_blank">[75] RFC-6749: The OAuth 2.0 Authorization
+            Framework</a></li>
+          <li><a href="https://tools.ietf.org/html/rfc6819" target="_blank">[57] RFC-6819: Threat Model and Security
+            Considerations</a></li>
+          <li><a href="https://tools.ietf.org/html/rfc7009" target="_blank">[11] RFC-7009: Token Revocation</a></li>
+          <li><a href="https://tools.ietf.org/html/rfc7519" target="_blank">[29] RFC-7519: JSON Web Token (JWT)</a></li>
+          <li><a href="https://tools.ietf.org/html/rfc7521" target="_blank">[20] RFC-7521: Assertion Framework</a></li>
+          <li><a href="https://tools.ietf.org/html/rfc7522" target="_blank">[15] RFC-7522: SAML 2.0 Profile</a></li>
+          <li><a href="https://tools.ietf.org/html/rfc7523" target="_blank">[12] RFC-7523: JSON Web Token (JWT)
+            Profile</a>
+          </li>
+          <li><a href="https://tools.ietf.org/html/rfc7591" target="_blank">[36] RFC-7591: Dynamic Client
+            Registration</a>
+          </li>
+          <li><a href="https://tools.ietf.org/html/rfc7592" target="_blank">[18] RFC-7592: Dynamic Client Registration
+            Management</a></li>
+          <li><a href="https://tools.ietf.org/html/rfc7636" target="_blank">[20] RFC-7636: Proof Key for Code
+            Exchange</a>
+          </li>
+          <li><a href="https://tools.ietf.org/html/rfc7662" target="_blank">[17] RFC-7662: Token Introspection</a></li>
+          <li><a href="https://tools.ietf.org/html/rfc8252" target="_blank">[21] RFC-8252: Native Apps</a></li>
+          <li><a href="https://tools.ietf.org/html/draft-ietf-oauth-device-flow-07" target="_blank">[17] DRAFT: Device
+            Flow</a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>TL/DR</h2>
+        <div style="position: relative">
+          <p class="fragment current-visible">A <em>resource owner</em> asks the <em>authorization server</em> to
+            authorize a <em>client</em> to access a protected <em>resource server</em>.</p>
+          <p class="fragment current-visible" style="position: absolute; top: 0; left: 0; right: 0; margin: 0">A user
+            grants their app permission<br/>to access data on a server.</p>
+        </div>
+      </section>
+
+      <section>
+        <h3>Caveat Emptor</h3>
+        <p>OAuth2 is an Authorization framework,<br/><em>not</em> an Authentication framework.</p>
+      </section>
+
+    </section>
+
+    <section>
+
+      <section>
+        <h2>Tokens</h2>
+        <p class="fragment">1: How to <em>get</em> a token</p>
+        <p class="fragment">2: How to <em>use</em> a token</p>
+      </section>
+
+      <section>
+        <h3>What is a token?</h3>
+        <pre class="fragment"><code class="http" data-trim>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+
+{
+    "token_type": "Bearer",
+    "access_token": "4c451ff3edf854b73da1bc624641fd54",
+    "expires_in": 600,
+    "refresh_token": "66fe4faef3fe1bf7ab9f1f7d4ca20bca",
+    "scope": "email public_profile"
+}
+          </code></pre>
+      </section>
+      <section>
+        <h3>Using a token</h3>
+        <pre><code class="javascript" data-trim>
+const token = {
+    "token_type": "Bearer",
+    "access_token": "4c451ff3edf854b73da1bc624641fd54",
+    "expires_in": 600,
+    "refresh_token": "66fe4faef3fe1bf7ab9f1f7d4ca20bca",
+    "scope": "email public_profile"
+};
+
+const xhr = new XMLHttpRequest();
+xhr.setRequestHeader('Authorization', 'Bearer ' + token.access_token);
+xhr.open('GET', 'https://example.com/resource', true);
+xhr.send(null);
+</code></pre>
+        <pre><code class="http" data-trim>
+GET /resource
+Host: example.com
+Accept: application/json
+Authorization: Bearer 4c451ff3edf854b73da1bc624641fd54
+</code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Anatomy of an OAuth2 Server</h3>
+      </section>
+
+      <section>
+        <h3>API endpoints</h3>
+        <ul style="list-style: none">
+          <li class="fragment">https://oauth2.example.com/authorize</li>
+          <li class="fragment">https://oauth2.example.com/token</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Clients</h3>
+        <small>Public vs. Private</small>
+      </section>
+
+      <section>
+        <h3>Error Format</h3>
+        <pre><code class="http" data-trim>
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+
+{
+    "error": "short_error_code",
+    "error_description": "Something Human Readable"
+}
+          </code></pre>
+      </section>
+      <section>
+        <h3>TLS</h3>
+        <small>It's required.</small>
+      </section>
+      <section>
+        <h3>Scopes</h3>
+        <ul>
+          <li>user:email</li>
+          <li>user:public_profile</li>
+          <li>https://www.googleapis.com/auth/userinfo.email</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Registration</h3>
+        <ul>
+          <li class="fragment"><strong>redirect_uri</strong>: https://app.example.com/redirect</li>
+          <li class="fragment"><strong>client_id</strong>: 505d7ad2f35a55aabc72471423b729d5</li>
+          <li class="fragment"><strong>client_secret</strong>: 3b9da6fd0822b0efb02fc71bad27fdd5</li>
+        </ul>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Use Case: Social Login</h3>
+        <table>
+          <tr>
+            <td><img src="buffer.png" height="300px"/></td>
+            <td style="vertical-align: top; margin-right: 40px;">
+              <br/>
+              <p>Server application</p>
+              <p>Cookie-based sessions</p>
+            </td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h3>Authorization Code (Section 4.1)</h3>
+        <ul>
+          <li>Client is trustworthy</li>
+          <li>Trust established via shared secret</li>
+          <li>Server makes all API calls</li>
+          <li>Tokens are held only by the server</li>
+          <li>Supports token refresh</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Step 1: Link to Authorization</h3>
+        <pre><code class="html" data-trim>
+&lt;a href="https://accounts.google.com/o/oauth2/v2/auth?...."&gt;Login&lt;/a&gt;
+</code></pre>
+        <pre><code class="http" data-trim>
+https://accounts.google.com/o/oauth2/v2/auth
+        ?response_type=code
+        &client_id=505d7ad2f35a55aabc72471423b729d5
+        &scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile
+        &state=5df23932458041acb94f95eeeffa49b8
+        &redirect_uri=https://server.example.com/redirect
+</code></pre>
+      </section>
+      <section>
+        <h3>Step 2: Receive Authorization Code</h3>
+        <pre><code class="http" data-trim>
+https://server.example.com/redirect
+        ?code=2997bc5ae3a0a2cbd6d00dc78f7a0d98
+        &state=5df23932458041acb94f95eeeffa49b8
+</code></pre>
+      </section>
+      <section>
+        <h3>Step 3: Exchange Code for Token</h3>
+        <pre><code class="http" data-trim>
+POST https://www.googleapis.com/oauth2/v4/token
+Authorization: Basic NTA1ZDdhZDJmMzVhNTVhYWJjNzI0NzE0MjNiNzI5ZDU6M2I5ZGE2ZmQwODIyYjBlZmIwMmZjNzFiYWQyN2ZkZDU=
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+      &code=2997bc5ae3a0a2cbd6d00dc78f7a0d98
+      &redirect_uri=http%3A%2F%server.example.com%2Fredirect
+      &state=2987fd6f218cf23c6128ab695cbcc824
+</code></pre>
+        <pre class="fragment"><code class="http" data-trim>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+
+{
+    "token_type": "Bearer",
+    "access_token": "4c451ff3edf854b73da1bc624641fd54",
+    "expires_in": 600,
+    "refresh_token": "66fe4faef3fe1bf7ab9f1f7d4ca20bca",
+    "scope": "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
+}
+          </code></pre>
+      </section>
+
+      <section>
+        <h3>Questions?</h3>
+        <small>...on Authorization Codes?</small>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Use Case: Browser Application</h3>
+        <table>
+          <tr>
+            <td>
+              <img src="pinterest.png" height="400px"/>
+            </td>
+            <td style="vertical-align: top; margin-right: 40px;">
+              <br/>
+              <p>Browser-only</p>
+              <p>No server sessions</p>
+            </td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h3>Implicit Code Grant (Section 4.2)</h3>
+        <ul>
+          <li>Client is <em>not</em> trustworthy</li>
+          <li>Client makes all API calls</li>
+          <li>No token refresh</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Step 1: Link to Authorization</h3>
+        <pre><code class="html" data-trim>
+&lt;a href="https://accounts.google.com/o/oauth2/v2/auth?...."&gt;Login&lt;/a&gt;
+</code></pre>
+        <pre><code class="http" data-trim>
+https://accounts.google.com/o/oauth2/v2/auth
+        ?response_type=token
+        &client_id=505d7ad2f35a55aabc72471423b729d5
+        &scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile
+        &state=5df23932458041acb94f95eeeffa49b8
+        &redirect_uri=https://app.example.com/redirect
+</code></pre>
+      </section>
+
+      <section>
+        <h3>Step 2: Get a token</h3>
+        <pre><code class="http" data-trim>
+HTTP/1.1 302
+Location: https://app.example.com/redirect
+          #access_token=7c53393ba731f6c07452f68f22af2043
+          &token_type=Bearer
+          &expires_in=600
+          &state=015e6183679ba49505d6fd6bbb3006c6
+          &scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile
+</code></pre>
+      </section>
+
+      <section>
+        <h3>Gotchas</h3>
+        <ul>
+          <li class="fragment">IE URL limit (2,048)</li>
+          <li class="fragment">No Refresh</li>
+          <li class="fragment">Redirect-based flow</li>
+          <li class="fragment">OAuth2 Predates CORS</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Questions?</h3>
+        <small>...on Implicit Flow?</small>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Use Case: Direct Login</h3>
+        <table>
+          <tr>
+            <td>
+              <img src="etsy.png" height="400px"/>
+            </td>
+            <td style="vertical-align: top; margin-right: 40px;">
+              <br/>
+              <p>Server application</p>
+              <p>Cookie-based sessions</p>
+            </td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <h3>Resource Owner (Section 4.3)</h3>
+        <ul>
+          <li>Client <em>may be</em> trustworthy</li>
+          <li>Tokens are held only by the client</li>
+          <li>Supports token refresh</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Submit Username &amp; Password</h3>
+        <pre><code class="http" data-trim>
+POST https://oauth2.example.com/token
+Authorization: Basic NTA1ZDdhZDJmMzVhNTVhYWJjNzI0NzE0MjNiNzI5ZDU6M2I5ZGE2ZmQwODIyYjBlZmIwMmZjNzFiYWQyN2ZkZDU=
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password
+          &username=valid_user
+          &password=valid_password
+          &scope=email public_profile
+</code></pre>
+        <pre class="fragment"><code class="http" data-trim>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+
+{
+    "token_type": "Bearer",
+    "access_token": "4c451ff3edf854b73da1bc624641fd54",
+    "expires_in": 600,
+    "refresh_token": "66fe4faef3fe1bf7ab9f1f7d4ca20bca",
+    "scope": "email public_profile"
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h3>Questions?</h3>
+        <small>...on Resource Owners?</small>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Use Case: Server to Server</h3>
+      </section>
+
+      <section>
+        <h3>Client Credentials (Section 4.4)</h3>
+        <ul>
+          <li>The actor is the client itself</li>
+          <li>Client is trustworthy</li>
+          <li>Tokens are held only by the client</li>
+          <li>Does not support token refresh</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Request and Receive token</h3>
+
+        <pre><code class="http" data-trim>
+POST https://oauth2.example.com/token
+Authorization: Basic MjNkYjUyZDk1Njc2NGIwMTY1Yjc5Nzc2YTM0NjA1NjY6MTk2MjMwNjhhZDM0NzQ1Y2Q2MGY3MDMzNDljNzNhZWI=
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+          &scope=email public_profile
+</code></pre>
+        <pre class="fragment"><code class="http" data-trim>
+HTTP/1.1 200
+Content-Type: application/json
+
+{
+        "access_token":"65cc4cacbb8dba2418161183836b98c5",
+        "token_type":"Bearer",
+        "expires_in":600,
+        "scope":"email public_profile"
+}
+</code></pre>
+      </section>
+
+      <section>
+        <h3>Questions?</h3>
+        <small>...on Client Credentials?</small>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Refreshing a token (Section 6)</h3>
+        <small>Authorization and Owner Credentials flow only.</small>
+      <pre class="fragment"><code class="http" data-trim>
+POST https://oauth2.example.com/token
+Authorization: Basic NTA1ZDdhZDJmMzVhNTVhYWJjNzI0NzE0MjNiNzI5ZDU6M2I5ZGE2ZmQwODIyYjBlZmIwMmZjNzFiYWQyN2ZkZDU=
+
+grant_type=refresh_token
+        &refresh_token=754636d20cf3ad85434cd3230ad2e048
+
+</code></pre>
+        <pre class="fragment"><code class="http" data-trim>
+HTTP/1.1 200
+Content-Type: application/json
+
+{
+    "token_type": "Bearer",
+    "access_token": "20b8b4b9372483ce453495541e4359fe",
+    "expires_in": 600,
+    "refresh_token": "460e5aa311f1dfb3bf994a121cb8c2f8",
+    "scope": "email public_profile"
+}
+</code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Extension Grants (Section 4.5)</h3>
+        <ul>
+          <li class="fragment"><a href="http://openid.net/connect/">OpenID Connect</a></li>
+          <li class="fragment"><a href="https://docs.kantarainitiative.org/uma/rec-uma-core.html">Kantara UMA</a></li>
+          <li class="fragment"><a href="https://openei.org/wiki/Green_Button_Developer">OpenESPI (Green Button)</a></li>
+        </ul>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Questions?</h3>
+      </section>
+      <section>
+        <dl>
+          <dt>Speaker:</dt>
+          <dd>
+            <a href="https://www.krotscheck.net">Michael Krotscheck</a>
+            <br/>
+            <a href="https://www.vmware.com">
+              <i class="fa fa-building-o"></i> VMware
+            </a>
+            <br/>
+            <a href="https://twitter.com/krotscheck" target="_blank">
+              <i class="fa fa-twitter"></i> krotscheck
+            </a>
+            <br/>
+            <a href="https://github.com/krotscheck" target="_blank">
+              <i class="fa fa-github"></i> https://github.com/krotscheck
+            </a>
+            <br/>
+            <a href="https://www.krotscheck.net" target="_blank">
+              <i class="fa fa-wordpress"></i> https://www.krotscheck.net
+            </a>
+          </dd>
+          <dt>Source:</dt>
+          <dd><a href="https://github.com/krotscheck/presentations">
+            https://github.com/krotscheck/presentations
+          </a></dd>
+          <dt>License:</dt>
+          <dd><a rel="license"
+                 href="https://creativecommons.org/licenses/by/4.0/">Creative
+            Commons Attribution 4.0 International</a></dd>
+        </dl>
+      </section>
+    </section>
+  </div>
+
+  <script src="../lib/js/head.min.js"></script>
+  <script src="../js/reveal.js"></script>
+
+  <script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+
+      transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+      // Optional reveal.js plugins
+      dependencies: [
+        {
+          src: '../lib/js/classList.js', condition: function () {
+          return !document.body.classList;
+        }
+        },
+        {
+          src: '../plugin/markdown/marked.js',
+          condition: function () {
+            return !!document.querySelector('[data-markdown]');
+          }
+        },
+        {
+          src: '../plugin/markdown/markdown.js',
+          condition: function () {
+            return !!document.querySelector('[data-markdown]');
+          }
+        },
+        {
+          src: '../plugin/highlight/highlight.js',
+          async: true,
+          condition: function () {
+            return !!document.querySelector('pre code');
+          },
+          callback: function () {
+            hljs.initHighlightingOnLoad();
+          }
+        },
+        {src: '../plugin/zoom-js/zoom.js', async: true},
+        {src: '../plugin/notes/notes.js', async: true}
+      ]
+    });
+
+  </script>
+</div>
+</body>
+</html>
