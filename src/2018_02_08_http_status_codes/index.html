@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Demystifying HTTP Status Codes</title>
+
+  <meta name="description"
+        content="Everything you ever wanted to know about HTTP Status code crammed into 10 minutes.">
+  <meta name="author" content="Michael Krotscheck">
+
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"/>
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+  <link rel="stylesheet" href="../css/reveal.css">
+  <link rel="stylesheet" href="../css/font-awesome.css">
+  <link rel="stylesheet" href="../css/font-mfizz.css">
+  <link rel="stylesheet" href="../css/theme/serif.css" id="theme">
+
+  <!-- Code syntax highlighting -->
+  <link rel="stylesheet" href="../lib/css/zenburn.css">
+
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href =
+      window.location.search.match(/print-pdf/gi) ? '../css/print/pdf.css' :
+        '../css/print/paper.css';
+    document.getElementsByTagName('head')[0].appendChild(link);
+  </script>
+
+  <!--[if lt IE 9]>
+  <script src="../lib/js/html5shiv.js"></script>
+  <![endif]-->
+
+  <style>
+    .reveal .footer {
+      position: absolute;
+      bottom: 1em;
+      left: 1em;
+      font-size: 0.5em;
+    }
+
+    .reveal section img {
+      border: 0;
+      box-shadow: none;
+    }
+
+    tr {
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="reveal" data-transition="slide">
+  <div class="footer">
+    https://krotscheck.github.io/presentations/2018_02_08_http_status_codes/index.html
+  </div>
+
+  <!-- Any section element inside of this container is displayed as a slide -->
+  <div class="slides">
+    <section>
+      <section>
+        <h2>HTTP Status Codes</h2>
+        <p>
+          <small>Everything you never wanted to know crammed into 10 minutes.
+          </small>
+        </p>
+      </section>
+      <section>
+        <h3>Introductions!</h3>
+        <dl>
+          <dt>Speaker:</dt>
+          <dd>
+            <a href="https://www.krotscheck.net">Michael Krotscheck</a>
+            <br/>
+            <a href="https://www.vmware.com">
+              <i class="fa fa-building-o"></i> VMware (<a
+              href="http://rolp.co/doGea">Hiring!!</a>)
+            </a>
+            <br/>
+            <a href="https://twitter.com/krotscheck" target="_blank">
+              <i class="fa fa-twitter"></i> krotscheck
+            </a>
+            <br/>
+            <a href="https://github.com/krotscheck" target="_blank">
+              <i class="fa fa-github"></i> https://github.com/krotscheck
+            </a>
+            <br/>
+            <a href="https://www.krotscheck.net" target="_blank">
+              <i class="fa fa-wordpress"></i> https://www.krotscheck.net
+            </a>
+          </dd>
+          <dt>Source:</dt>
+          <dd><a href="https://github.com/krotscheck/presentations">
+            https://github.com/krotscheck/presentations
+          </a></dd>
+        </dl>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Resource Lifecycle</h2>
+      </section>
+      <section>
+        <h2>200 OK</h2>
+        <pre><code class="http" data-trim>
+GET /resource
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+
+{ "my": "resource" }
+          </code></pre>
+      </section>
+      <section>
+        <h2>201 Created</h2>
+        <pre><code class="http" data-trim>
+POST /resource
+Host: example.com
+Content-Type: application/json
+
+{ "my": "resource" }
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 201 Created
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+Location: /resource/new-resource-id
+
+{
+    "my": "new resource"
+}
+          </code></pre>
+      </section>
+      <section>
+        <h2>202 Accepted</h2>
+        <pre><code class="http" data-trim>
+POST /resource
+Host: example.com
+Content-Type: application/json
+
+{ "my": "resource" }
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 202 Accepted
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+Location: "/some/monitoring/uri"
+
+{
+    "status": "PENDING",
+    "monitor": "/some/monitoring/uri"
+}
+          </code></pre>
+      </section>
+      <section>
+        <h2>204 No Content</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 204 No Content
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+          </code></pre>
+      </section>
+      <section>
+        <h2>205 Reset Content</h2>
+        <pre><code class="http" data-trim>
+DELETE /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 205 Reset Content
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+          </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Authn/Authz</h2>
+      </section>
+      <section>
+        <h2>401 Unauthorized</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+
+{ "malicious": "body" }
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Basic realm=example.com
+          </code></pre>
+      </section>
+      <section>
+        <h2>403 Forbidden</h2>
+        <pre><code class="http" data-trim>
+GET /resource/admin-only-resource
+Authorization: Bearer [token-without-admin-rights]
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 403 Forbidden
+          </code></pre>
+      </section>
+      <section>
+        <h2>404 Not Found</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Authorization: Bearer [token-without-admin-rights]
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 404 Not Found
+          </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Redirection</h2>
+      </section>
+      <section>
+        <h2>Gotcha's!</h2>
+        <ul>
+          <li class="fragment"><code>XMLHttpRequest</code> transparently follows
+            redirects.
+          </li>
+          <li class="fragment"><code>fetch()</code> permits interception.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>301 Moved Permanently</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 301 Moved Permanently
+Location: https://example.com/resource/my-resource-id
+          </code></pre>
+      </section>
+      <section>
+        <h2>302 Found</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 302 Found
+Location: /resource/some-other-location
+          </code></pre>
+        <pre><code class="http" data-trim>
+GET /resource/some-other-location
+Host: example.com
+</code></pre>
+      </section>
+      <section>
+        <h2>303 See Other</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 303 See Other
+Location: /resource/some-other-location
+          </code></pre>
+        <pre><code class="http" data-trim>
+GET /resource/some-other-location
+Host: example.com
+</code></pre>
+      </section>
+      <section>
+        <h2>307 Temporary Redirect</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 307 Temporary Redirect
+Location: /resource/some-other-location
+          </code></pre>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+</code></pre>
+      </section>
+      <section>
+        <h2>308 Permanent Redirect</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 308 Permanent Redirect
+Location: /resource/some-other-location
+          </code></pre>
+        <pre><code class="http" data-trim>
+PUT /resource/some-other-location
+</code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Bad Requests</h2>
+      </section>
+      <section>
+        <h2>400 Bad Request</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+
+{ "malformed": "body" }
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 400 Bad Request
+          </code></pre>
+      </section>
+      <section>
+        <h2>405 Method Not Allowed</h2>
+        <pre><code class="http" data-trim>
+POST /resource/my-resource-id
+Host: example.com
+
+{ "my": "resource" }
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, HEAD, OPTIONS, PUT, DELETE
+          </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Server Errors</h2>
+      </section>
+      <section>
+        <h2>500 Internal Server Error</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 500 Internal Server Error
+          </code></pre>
+      </section>
+      <section>
+        <h2>501 Not Implemented</h2>
+        <pre><code class="http" data-trim>
+CUSTOM_METHOD /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 501 Not Implemented
+          </code></pre>
+      </section>
+      <section>
+        <h2>503 Service Unavailable</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 503 Service Unavailable
+Retry-After: 1000
+          </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Cache Control</h2>
+      </section>
+      <section>
+        <h2>Date</h2>
+        <ul>
+          <li><code>Last-Modified: [date]</code></li>
+          <li><code>If-Modified-Since: [date]</code></li>
+          <li><code>If-Unmodified-Since: [date]</code></li>
+        </ul>
+      </section>
+      <section>
+        <h2>ETag</h2>
+        <ul>
+          <li><code>Etag: [etag]</code></li>
+          <li><code>If-Match: [etag]</code></li>
+          <li><code>If-None-Match: [etag]</code></li>
+        </ul>
+      </section>
+      <section>
+        <h2>304 Not Modified</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+If-Modified-Since: Thu, 8 Feb 2018 05:22:11 GMT
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 304 Not Modified
+          </code></pre>
+      </section>
+      <section>
+        <h2>409 Conflict</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+
+{ "my": "resource" }
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 409 Conflict
+Last-Modified: Thu, 8 Feb 2018 05:22:11 GMT
+          </code></pre>
+      </section>
+      <section>
+        <h2>410 Gone</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 410 Gone
+          </code></pre>
+      </section>
+      <section>
+        <h2>412 Precondition Failed</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+If-Unmodified-Since: Thu, 8 Feb 2018 05:22:11 GMT
+
+{ "my": "resource" }
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 412 Precondition Failed
+          </code></pre>
+      </section>
+      <section>
+        <h2>428 Precondition Required</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 428 Precondition Required
+
+{ 'If-Unmodified-Since': true }
+          </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>API Throttling</h2>
+      </section>
+      <section>
+        <h2>420 Enhance Your Calm</h2>
+        <pre><code class="http" data-trim>
+GET /resource/all-tweets-in-the-world
+Host: twitter.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 420 Enhance Your Calm
+          </code></pre>
+      </section>
+      <section>
+        <h2>429 Too Many Requests</h2>
+        <pre><code class="http" data-trim>
+GET /every/tweet/ever
+Host: twitter.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 429 Too Many Requests
+Retry-After: 1000
+          </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>Proxy management</h2>
+      </section>
+      <section>
+        <h2>203 Non-Authoritative Information</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 203 Non-Authoritative Information
+X-Injected-Header: Proxy-id
+Date: Tue, 5 Dec 2017 06:25:29 GMT
+          </code></pre>
+        <small>(Effectively a 200)</small>
+      </section>
+      <section>
+        <h2>305 Use Proxy</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 305 Use Proxy
+Location: https://different-aws-region.example.com/resource/my-resource-id
+          </code></pre>
+      </section>
+      <section>
+        <h2>407 Proxy Authentication Required</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: different-aws-region.example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 407 Proxy Authentication Required
+Proxy-Authorization: Basic realm=corporate-proxy.example.com
+          </code></pre>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: different-aws-region.example.com
+Proxy-Authentication: Basic [basic-auth-credentials]
+</code></pre>
+      </section>
+      <section>
+        <h2>502 Bad Gateway</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 502 Bad Gateway
+          </code></pre>
+      </section>
+      <section>
+        <h2>504 Gateway Timeout</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 504 Gateway Timeout
+          </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h2>"Jokes"</h2>
+      </section>
+      <section>
+        <h2>418 I'm a teapot</h2>
+        <pre><code class="http" data-trim>
+GET /coffee
+Host: kitchen-util-1122313.local
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 418 I'm a teapot
+          </code></pre>
+      </section>
+      <section>
+        <h2>451 Unavailable for Legal Reasons</h2>
+        <pre><code class="http" data-trim>
+GET /start-the-uprising.pdf
+Host: revolution.cn
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 451 Unavailable for Legal Reasons
+          </code></pre>
+      </section>
+    </section>
+  </div>
+
+  <script src="../lib/js/head.min.js"></script>
+  <script src="../js/reveal.js"></script>
+
+  <script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+
+      transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+      // Optional reveal.js plugins
+      dependencies: [
+        {
+          src: '../lib/js/classList.js', condition: function () {
+            return !document.body.classList;
+          }
+        },
+        {
+          src: '../plugin/markdown/marked.js', condition: function () {
+            return !!document.querySelector('[data-markdown]');
+          }
+        },
+        {
+          src: '../plugin/markdown/markdown.js', condition: function () {
+            return !!document.querySelector('[data-markdown]');
+          }
+        },
+        {
+          src: '../plugin/highlight/highlight.js',
+          async: true,
+          condition: function () {
+            return !!document.querySelector('pre code');
+          },
+          callback: function () {
+            hljs.initHighlightingOnLoad();
+          }
+        },
+        {src: '../plugin/zoom-js/zoom.js', async: true},
+        {src: '../plugin/notes/notes.js', async: true}
+      ]
+    });
+
+  </script>
+</div>
+<!-- http://www.restapitutorial.com/httpstatuscodes.html -->
+</body>
+</html>
