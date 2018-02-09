@@ -387,6 +387,29 @@ Retry-After: 1000
         <h2>Cache Control</h2>
       </section>
       <section>
+        <h2>409 Conflict</h2>
+        <pre><code class="http" data-trim>
+PUT /resource/my-resource-id
+Host: example.com
+
+{ "my": "resource" }
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 409 Conflict
+Last-Modified: Thu, 8 Feb 2018 05:22:11 GMT
+          </code></pre>
+      </section>
+      <section>
+        <h2>410 Gone</h2>
+        <pre><code class="http" data-trim>
+GET /resource/my-resource-id
+Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 410 Gone
+          </code></pre>
+      </section>
+      <section>
         <h2>Date</h2>
         <ul>
           <li><code>Last-Modified: [date]</code></li>
@@ -413,26 +436,15 @@ HTTP/1.1 304 Not Modified
           </code></pre>
       </section>
       <section>
-        <h2>409 Conflict</h2>
+        <h2>428 Precondition Required</h2>
         <pre><code class="http" data-trim>
 PUT /resource/my-resource-id
 Host: example.com
+</code></pre>
+        <pre><code class="http" data-trim>
+HTTP/1.1 428 Precondition Required
 
-{ "my": "resource" }
-</code></pre>
-        <pre><code class="http" data-trim>
-HTTP/1.1 409 Conflict
-Last-Modified: Thu, 8 Feb 2018 05:22:11 GMT
-          </code></pre>
-      </section>
-      <section>
-        <h2>410 Gone</h2>
-        <pre><code class="http" data-trim>
-GET /resource/my-resource-id
-Host: example.com
-</code></pre>
-        <pre><code class="http" data-trim>
-HTTP/1.1 410 Gone
+{ 'If-Unmodified-Since': true }
           </code></pre>
       </section>
       <section>
@@ -446,18 +458,6 @@ If-Unmodified-Since: Thu, 8 Feb 2018 05:22:11 GMT
 </code></pre>
         <pre><code class="http" data-trim>
 HTTP/1.1 412 Precondition Failed
-          </code></pre>
-      </section>
-      <section>
-        <h2>428 Precondition Required</h2>
-        <pre><code class="http" data-trim>
-PUT /resource/my-resource-id
-Host: example.com
-</code></pre>
-        <pre><code class="http" data-trim>
-HTTP/1.1 428 Precondition Required
-
-{ 'If-Unmodified-Since': true }
           </code></pre>
       </section>
     </section>
@@ -525,12 +525,12 @@ Host: different-aws-region.example.com
 </code></pre>
         <pre><code class="http" data-trim>
 HTTP/1.1 407 Proxy Authentication Required
-Proxy-Authorization: Basic realm=corporate-proxy.example.com
+Proxy-Authentication: Basic realm=corporate-proxy.example.com
           </code></pre>
         <pre><code class="http" data-trim>
 GET /resource/my-resource-id
 Host: different-aws-region.example.com
-Proxy-Authentication: Basic [basic-auth-credentials]
+Proxy-Authorization: Basic [basic-auth-credentials]
 </code></pre>
       </section>
       <section>
