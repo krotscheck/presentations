@@ -1,0 +1,15 @@
+FROM python:2.7-stretch
+
+RUN apt-get update && apt-get dist-upgrade -y
+RUN apt-get install -y gnupg openssl sudo xxd nano
+RUN pip install doitlive ansible
+
+RUN useradd -ms /bin/bash jenkins
+ADD gpg.jenkins.config /home/jenkins/gpg.config
+ADD jenkins.sudoers /etc/sudoers.d/jenkins
+
+USER jenkins
+WORKDIR /home/jenkins
+ENV EDITOR=nano
+ADD presentation.jenkins.sh /home/jenkins/presentation.sh
+CMD doitlive play /home/jenkins/presentation.sh -p damoekri

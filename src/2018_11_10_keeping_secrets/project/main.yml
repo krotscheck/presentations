@@ -1,0 +1,8 @@
+
+- hosts: localhost
+  become: false
+  connection: local
+  tasks:
+  - name: Display secrets
+    debug:
+      var: debug
